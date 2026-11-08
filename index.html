@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADTs in OOP – Year 13 Pre-learning | CIE 9618</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+body{margin:0;padding:0;background:#f5f5f5;font-family:'Lato',sans-serif;font-size:14pt;color:#333333;line-height:1.65;}
+
+.opt{display:block;font-family:'Lato',sans-serif;font-size:14pt;padding:11px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#ffffff;color:#333333;cursor:pointer;margin-bottom:10px;line-height:1.4;user-select:none;-webkit-user-select:none;transition:background 0.12s,border-color 0.12s;}
+.opt:hover{background:#e3f2fd;border-color:#007BA6;}
+.opt.selected{background:#e3f2fd;border-color:#007BA6;font-weight:700;}
+.opt.correct{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;font-weight:700;pointer-events:none;cursor:default;}
+.opt.wrong{background:#ffebee!important;border-color:#C62828!important;color:#7f0000!important;pointer-events:none;cursor:default;}
+.opt.reveal{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;font-weight:700;pointer-events:none;cursor:default;}
+.opt.locked{pointer-events:none;cursor:default;}
+
+.wopt{display:inline-block;font-family:'Courier New',Courier,monospace;font-size:13pt;font-weight:700;padding:8px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#ffffff;color:#333333;cursor:pointer;margin:4px 6px 4px 0;line-height:1.4;user-select:none;-webkit-user-select:none;transition:background 0.12s,border-color 0.12s;}
+.wopt:hover{background:#e3f2fd;border-color:#007BA6;}
+.wopt.selected{background:#e3f2fd;border-color:#007BA6;color:#007BA6;}
+.wopt.correct{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;pointer-events:none;}
+.wopt.wrong{background:#ffebee!important;border-color:#C62828!important;color:#7f0000!important;pointer-events:none;}
+.wopt.reveal{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;pointer-events:none;}
+.wopt.locked{pointer-events:none;}
+
+.fb{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:14px;}
+.fb-ok{background:#e8f5e9;color:#1b5e20;border:1px solid #81c784;}
+.fb-bad{background:#ffebee;color:#7f0000;border:1px solid #ef9a9a;}
+
+.tf-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:10px;padding:12px 16px;background:#fff;border:1px solid #d0d0d0;border-radius:6px;}
+.tf-stmt{flex:1;font-family:'Lato',sans-serif;font-size:14pt;color:#333;line-height:1.5;}
+.tf-btns{display:flex;gap:8px;flex-shrink:0;margin-top:2px;}
+.tf-btn{font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#fff;color:#333;cursor:pointer;}
+.tf-btn:hover{background:#e3f2fd;border-color:#007BA6;}
+.tf-btn.ok{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;pointer-events:none;}
+.tf-btn.bad{background:#ffebee;border-color:#C62828;color:#7f0000;pointer-events:none;}
+.tf-btn.show{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;pointer-events:none;}
+.tf-row.done .tf-btn{pointer-events:none;}
+.tf-row{flex-wrap:wrap;}
+.tf-row > div:not(.tf-stmt):not(.tf-btns){flex-basis:100%;}
+
+.match-row{display:grid;grid-template-columns:200px 1fr;gap:8px;margin-bottom:8px;align-items:center;}
+.match-term{font-family:'Courier New',monospace;font-size:13pt;font-weight:700;padding:9px 12px;background:#1e1e2e;border-radius:6px;color:#a6e3a1;text-align:center;line-height:1.4;}
+.match-sel{font-family:'Lato',sans-serif;font-size:13pt;padding:9px 12px;border:2px solid #d0d0d0;border-radius:6px;background:#fff;color:#333;width:100%;cursor:pointer;}
+.match-sel:focus{outline:none;border-color:#007BA6;}
+.match-row.ok .match-sel{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;}
+.match-row.bad .match-sel{background:#ffebee;border-color:#C62828;color:#7f0000;}
+.match-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:8px 22px;border:2px solid #007BA6;border-radius:6px;background:#007BA6;color:#fff;cursor:pointer;margin-top:12px;}
+.match-btn:hover{background:#005f80;}
+.match-btn:disabled{background:#b3d4e8;border-color:#b3d4e8;cursor:default;}
+.match-result{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:12px;}
+
+.drag-bank{display:flex;flex-wrap:wrap;gap:8px;padding:14px;background:#f0f8ff;border:2px dashed #b3d4e8;border-radius:6px;min-height:52px;margin-bottom:12px;}
+.drag-chip{font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 16px;border:2px solid #007BA6;border-radius:6px;background:#e3f2fd;color:#007BA6;cursor:grab;white-space:nowrap;user-select:none;-webkit-user-select:none;}
+.drag-chip:active{cursor:grabbing;opacity:0.7;}
+.drag-chip.locked{cursor:default;pointer-events:none;opacity:0.75;}
+.drop-zone{display:inline-flex;align-items:center;justify-content:center;min-width:130px;padding:4px 8px;border-bottom:3px solid #007BA6;background:#fafafa;font-family:'Lato',sans-serif;font-size:12pt;color:#C62828;font-weight:700;vertical-align:middle;text-align:center;min-height:28px;}
+.drop-zone.drag-over{background:#e3f2fd;border-bottom-color:#C62828;}
+.sort-zone{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:6px;min-height:76px;}
+.check-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:8px 22px;border:2px solid #007BA6;border-radius:6px;background:#007BA6;color:#fff;cursor:pointer;margin-top:12px;}
+.check-btn:hover{background:#005f80;}
+.check-btn:disabled{background:#b3d4e8;border-color:#b3d4e8;cursor:default;}
+.drag-result{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:12px;}
+
+code{font-family:'Courier New',monospace;background:#f0f0f0;padding:1px 6px;border-radius:3px;font-size:13pt;}
+.cx-tbl{border-collapse:collapse;width:100%;font-size:13pt;}
+.cx-tbl th{background:#007BA6;color:#fff;padding:9px 14px;border:1px solid #005f80;text-align:center;}
+.cx-tbl td{border:1px solid #d0d0d0;padding:8px 14px;text-align:left;vertical-align:top;}
+.cx-tbl tr:nth-child(even) td{background:#f0f8ff;}
+.code{margin:0;background:#1e1e2e;border-radius:8px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12pt;line-height:1.85;color:#cdd6f4;white-space:pre;overflow-x:auto;}
+.code-lbl{font-size:11pt;font-weight:700;color:#6c7086;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-family:'Lato',sans-serif;white-space:normal;}
+.k{color:#f38ba8;}.v{color:#fab387;}.f{color:#a6e3a1;}.cm{color:#6c7086;}.s{color:#f9e2af;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.rec{display:flex;gap:4px;margin-bottom:4px;font-family:'Courier New',monospace;font-size:11pt;}
+.rec span{background:#fff;border:1px solid #b3d4e8;border-radius:3px;padding:2px 6px;}
+.rec span.key{background:#fff3e0;border-color:#e65100;font-weight:700;color:#e65100;}
+.rec span.addr{background:#1e1e2e;color:#fab387;border-color:#1e1e2e;min-width:34px;text-align:center;}
+.rec span.empty{color:#aaa;font-style:italic;}
+.slot-line{font-family:'Courier New',monospace;font-size:12pt;color:#cdd6f4;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.slot-line .ln{color:#6c7086;min-width:22px;text-align:right;}
+.drop-zone .drag-chip{white-space:normal;}
+.g2w{grid-template-columns:1.2fr 1fr;}
+@media (max-width:720px){
+  .g2,.g3,.g2w{grid-template-columns:1fr;}
+  .match-row{grid-template-columns:1fr;}
+  .tf-row{flex-direction:column;}
+}
+.cls{border:2px solid #007BA6;border-radius:6px;background:#fff;font-family:'Courier New',monospace;font-size:12pt;overflow:hidden;}
+.cls-h{background:#007BA6;color:#fff;font-weight:700;text-align:center;padding:6px 10px;font-family:'Lato',sans-serif;font-size:13pt;}
+.cls-s{padding:6px 12px;border-top:1px solid #b3d4e8;line-height:1.7;}
+.priv{color:#C62828;font-weight:700;}.pub{color:#1b5e20;font-weight:700;}
+.term{font-weight:700;color:#007BA6;}
+.g2>*,.g3>*{min-width:0;}
+
+.exq{background:#fffdf5;border:2px solid #e65100;border-radius:8px;padding:16px 20px;margin-bottom:14px;}
+.exq-lbl{font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#e65100;margin-bottom:8px;}
+.exq-q{font-size:14pt;font-weight:700;color:#333;line-height:1.5;margin-bottom:10px;}
+.exq-mk{color:#e65100;font-weight:700;white-space:nowrap;}
+.ans-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 18px;border:2px solid #e65100;border-radius:6px;background:#fff;color:#e65100;cursor:pointer;}
+.ans-btn:hover{background:#fff3e0;}
+.ans{display:none;margin-top:12px;background:#fff3e0;border-radius:6px;padding:12px 16px;font-size:13pt;line-height:1.7;}
+.ans ul{margin:4px 0 0;padding-left:1.2em;}
+.recap{border-left:4px solid #00796B;background:#e0f2f1;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;font-size:13.5pt;}
+.recap strong.h{color:#00796B;}
+
+.ntbl{border-collapse:collapse;font-family:'Courier New',monospace;font-size:12pt;margin:0 auto;}
+.ntbl th{background:#007BA6;color:#fff;padding:6px 12px;border:1px solid #005f80;font-family:'Lato',sans-serif;}
+.ntbl td{border:1px solid #b3d4e8;padding:5px 12px;text-align:center;background:#fff;}
+.ntbl td.ix{background:#1e1e2e;color:#fab387;font-weight:700;}
+.ptr{display:inline-block;background:#fff3e0;border:1px solid #e65100;color:#e65100;font-weight:700;border-radius:4px;padding:2px 10px;font-family:'Courier New',monospace;font-size:12pt;margin:2px 6px 2px 0;}
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;">
+<div style="max-width:960px;margin:0 auto;padding:0 0 80px;">
+
+<!-- HEADER -->
+<div style="background:#007BA6;padding:32px 40px 28px;">
+  <div style="font-size:11pt;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">CIE A-Level Computer Science 9618 &bull; Unit 4 &bull; Topic 20.1 Programming Paradigms</div>
+  <div style="font-size:24pt;font-weight:700;color:#ffffff;margin:0 0 6px;">Object-Oriented Techniques: Coding ADTs as Classes</div>
+  <div style="font-size:14pt;color:rgba(255,255,255,0.88);">Pre-learning &nbsp;|&nbsp; Year 13 Computer Science</div>
+  <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap;">
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 90 minutes</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 6 sections</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 23 interactive activities</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 5 worked exam questions</span>
+  </div>
+</div>
+
+<!-- CONTENTS -->
+<div style="background:#ffffff;border-bottom:1px solid #d0d0d0;padding:20px 40px;">
+  <div style="font-size:12pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">Contents</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>ADTs as Classes</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>Stack</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>Queue</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>Linked List</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>Binary Tree</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">6</div>Exam Practice: Choosing &amp; Debugging ADTs</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&#10003;</div>Summary</div>
+  </div>
+</div>
+
+<div style="padding:40px 40px 0;">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 1 — ADTS AS CLASSES
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">ADTs as Classes</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~10 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;">You already know the OOP terminology and you have met stacks, queues, linked lists and binary trees. This pre-learning puts the two together. In Paper 4 you may be asked to <strong>write an abstract data type (ADT) as a class</strong> in Python. The good news is that every ADT class follows the same pattern, so once you can see the pattern, the code becomes much easier.</p>
+    <div class="g2" style="margin-bottom:16px;">
+      <div style="background:#e3f2fd;border-radius:8px;padding:16px 18px;border-top:4px solid #007BA6;">
+        <div style="font-weight:700;color:#007BA6;font-size:15pt;margin-bottom:8px;">Data &rarr; private attributes</div>
+        <p style="margin:0;font-size:13pt;">The array that holds the items and every <strong>pointer</strong> (TopPointer, Head, Tail, Free, Root…) become <strong>private attributes</strong>, set up in the constructor.</p>
+      </div>
+      <div style="background:#e8f5e9;border-radius:8px;padding:16px 18px;border-top:4px solid #388e3c;">
+        <div style="font-weight:700;color:#388e3c;font-size:15pt;margin-bottom:8px;">Operations &rarr; public methods</div>
+        <p style="margin:0;font-size:13pt;">Push, Pop, Enqueue, Dequeue, Insert, Search and Traverse become <strong>public methods</strong>. Code outside the class can only use the ADT through them. This is <strong>encapsulation</strong>.</p>
+      </div>
+    </div>
+    <div style="overflow-x:auto;margin-bottom:16px;">
+      <table class="cx-tbl">
+        <tr><th>ADT</th><th>Rule</th><th>Private attributes</th><th>Main methods</th></tr>
+        <tr><td><span class="term">Stack</span></td><td>LIFO — last in, first out</td><td><code>Items</code>, <code>TopPointer</code></td><td>Push, Pop, IsEmpty, IsFull</td></tr>
+        <tr><td><span class="term">Queue</span></td><td>FIFO — first in, first out</td><td><code>Items</code>, <code>Head</code>, <code>Tail</code>, <code>NumberOfItems</code></td><td>Enqueue, Dequeue</td></tr>
+        <tr><td><span class="term">Linked list</span></td><td>Each node points to the next node</td><td><code>Nodes</code> (Node objects), <code>Head</code>, <code>Free</code></td><td>AddToFront, Traverse, Search</td></tr>
+        <tr><td><span class="term">Binary tree</span></td><td>Left is smaller, right is larger or equal</td><td><code>Nodes</code> (TreeNode objects), <code>Root</code>, <code>NextFree</code></td><td>Insert, Search, InOrder</td></tr>
+      </table>
+    </div>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#9966FF;">Two kinds of class:</strong> stacks and queues need only <strong>one</strong> class. Linked lists and binary trees need <strong>two</strong>: a small <code>Node</code> class for one item and its pointer(s), and a main class that <em>contains</em> an array of Node objects. That is <strong>containment</strong>.</div>
+    <div style="border-left:4px solid #e65100;background:#fff3e0;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#e65100;">The null pointer:</strong> on this page, <code>-1</code> means "points to nothing" (an empty stack, the end of a list, no child). It cannot be 0, because 0 is a real array index.</div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Explain why the pointers in a Stack class are declared as <strong>private</strong> attributes. <span class="exq-mk">[2]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(1,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans1"><strong>Mark scheme — one mark for each point:</strong><ul><li>So they cannot be changed directly by code outside the class</li><li>They can only be changed through the methods Push() and Pop(), which check for full / empty, so the stack cannot be corrupted (e.g. TopPointer pointing outside the array)</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> Name the actual methods from the question. This is what turns a general point about encapsulation into an answer about this ADT.</div></div>
+    </div>
+    <div style="border-left:4px solid #007BA6;background:#e3f2fd;padding:12px 16px;border-radius:0 6px 6px 0;"><strong style="color:#007BA6;">CIE 9618 Specification (20.1):</strong> you need to be able to write code that demonstrates the use of OOP, including classes, objects, encapsulation and containment. Here you apply those techniques to the ADTs from Topic 19.1.</div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 1 — Match the ADT to its description</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Use the dropdowns to match each term to its description.</div>
+    <div id="match1">
+      <div class="match-row"><div class="match-term">Stack</div><select class="match-sel" data-ans="stk"><option value="">— choose —</option><option value="q">FIFO: items are added at the tail and removed from the head</option><option value="nd">One item of data stored with its pointer(s)</option><option value="bt">Each node has a left and a right pointer; smaller values go left</option><option value="stk">LIFO: items are added and removed at the top</option><option value="ll">Items are joined by pointers, so they need not be stored in order in the array</option></select></div>
+      <div class="match-row"><div class="match-term">Queue</div><select class="match-sel" data-ans="q"><option value="">— choose —</option><option value="q">FIFO: items are added at the tail and removed from the head</option><option value="nd">One item of data stored with its pointer(s)</option><option value="bt">Each node has a left and a right pointer; smaller values go left</option><option value="stk">LIFO: items are added and removed at the top</option><option value="ll">Items are joined by pointers, so they need not be stored in order in the array</option></select></div>
+      <div class="match-row"><div class="match-term">Linked list</div><select class="match-sel" data-ans="ll"><option value="">— choose —</option><option value="q">FIFO: items are added at the tail and removed from the head</option><option value="nd">One item of data stored with its pointer(s)</option><option value="bt">Each node has a left and a right pointer; smaller values go left</option><option value="stk">LIFO: items are added and removed at the top</option><option value="ll">Items are joined by pointers, so they need not be stored in order in the array</option></select></div>
+      <div class="match-row"><div class="match-term">Binary tree</div><select class="match-sel" data-ans="bt"><option value="">— choose —</option><option value="q">FIFO: items are added at the tail and removed from the head</option><option value="nd">One item of data stored with its pointer(s)</option><option value="bt">Each node has a left and a right pointer; smaller values go left</option><option value="stk">LIFO: items are added and removed at the top</option><option value="ll">Items are joined by pointers, so they need not be stored in order in the array</option></select></div>
+      <div class="match-row"><div class="match-term">Node</div><select class="match-sel" data-ans="nd"><option value="">— choose —</option><option value="q">FIFO: items are added at the tail and removed from the head</option><option value="nd">One item of data stored with its pointer(s)</option><option value="bt">Each node has a left and a right pointer; smaller values go left</option><option value="stk">LIFO: items are added and removed at the top</option><option value="ll">Items are joined by pointers, so they need not be stored in order in the array</option></select></div>
+    </div>
+    <button class="match-btn" id="match1-btn" onclick="checkMatch1()">&#10003; Check my answers</button>
+    <div class="match-result" id="match1-res"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#8644; Activity 2 — Sort: which class does each attribute belong to?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag each private attribute into the class that needs it.</div>
+    <div class="drag-bank" id="bank2">
+      <div class="drag-chip" draggable="true">TopPointer</div>
+      <div class="drag-chip" draggable="true">Tail</div>
+      <div class="drag-chip" draggable="true">Free</div>
+      <div class="drag-chip" draggable="true">Left</div>
+      <div class="drag-chip" draggable="true">NumberOfItems</div>
+      <div class="drag-chip" draggable="true">Right</div>
+      <div class="drag-chip" draggable="true">Head (of a queue)</div>
+      <div class="drag-chip" draggable="true">NextNode</div>
+    </div>
+    <div class="g2" style="margin-bottom:12px;">
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Stack</div>
+        <div id="sort2-0" class="sort-zone drag-bank" style="border-color:#007BA6;background:#f0f8ff;min-height:110px;flex-direction:column;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#e65100;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Queue</div>
+        <div id="sort2-1" class="sort-zone drag-bank" style="border-color:#e65100;background:#fffaf3;min-height:110px;flex-direction:column;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#388e3c;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Linked list / Node</div>
+        <div id="sort2-2" class="sort-zone drag-bank" style="border-color:#388e3c;background:#f0f8f0;min-height:110px;flex-direction:column;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#6a1b9a;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Binary tree / TreeNode</div>
+        <div id="sort2-3" class="sort-zone drag-bank" style="border-color:#6a1b9a;background:#f7f0fa;min-height:110px;flex-direction:column;"></div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn2" onclick="checkSort2()">&#10003; Check my sort</button>
+    <div class="drag-result" id="res2"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 3 — Multiple choice</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Why do the Node and LinkedList classes on this page use <code>-1</code> as the null pointer, rather than <code>0</code>?</div>
+    <div id="opts3">
+      <div class="opt" onclick="pickOpt(3,'a',this)">a) -1 uses less memory than 0</div>
+      <div class="opt" onclick="pickOpt(3,'b',this)">b) 0 is a valid array index, so it could point to a real node; -1 can never be an index in the array</div>
+      <div class="opt" onclick="pickOpt(3,'c',this)">c) Python does not allow 0 to be stored in an attribute</div>
+      <div class="opt" onclick="pickOpt(3,'d',this)">d) -1 makes the list sort itself</div>
+    </div>
+    <div class="fb" id="fb3"></div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 2 — STACK
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Stack</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~15 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> A <strong>stack</strong> is LIFO. A single pointer, <code>TopPointer</code>, holds the index of the item at the top. It starts at <code>-1</code> (empty). <strong>Push</strong> moves the pointer up, then stores; <strong>Pop</strong> reads the top item, then moves the pointer down.</div>
+    <div class="code" style="font-size:11pt;margin-bottom:16px;"><div class="code-lbl">Python — the Stack class</div><span class="k">class</span> <span class="f">Stack</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self, Size):
+        self.__Items = [<span class="s">""</span>] * Size
+        self.__Size = Size
+        self.__TopPointer = -<span class="v">1</span>        <span class="cm"># empty</span>
+
+    <span class="k">def</span> <span class="f">IsEmpty</span>(self):
+        <span class="k">return</span> self.__TopPointer == -<span class="v">1</span>
+
+    <span class="k">def</span> <span class="f">IsFull</span>(self):
+        <span class="k">return</span> self.__TopPointer == self.__Size - <span class="v">1</span>
+
+    <span class="k">def</span> <span class="f">Push</span>(self, NewItem):
+        <span class="k">if</span> self.<span class="f">IsFull</span>():
+            <span class="k">return</span> <span class="k">False</span>
+        self.__TopPointer = self.__TopPointer + <span class="v">1</span>
+        self.__Items[self.__TopPointer] = NewItem
+        <span class="k">return</span> <span class="k">True</span>
+
+    <span class="k">def</span> <span class="f">Pop</span>(self):
+        <span class="k">if</span> self.<span class="f">IsEmpty</span>():
+            <span class="k">return</span> <span class="k">None</span>
+        Item = self.__Items[self.__TopPointer]
+        self.__TopPointer = self.__TopPointer - <span class="v">1</span>
+        <span class="k">return</span> Item</div>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div>
+        <div class="cls" style=""><div class="cls-h">Stack</div><div class="cls-s"><span class="priv">-</span> Items : ARRAY<br><span class="priv">-</span> Size : INTEGER<br><span class="priv">-</span> TopPointer : INTEGER</div><div class="cls-s"><span class="pub">+</span> Constructor(Size)<br><span class="pub">+</span> IsEmpty() : BOOLEAN<br><span class="pub">+</span> IsFull() : BOOLEAN<br><span class="pub">+</span> Push(NewItem) : BOOLEAN<br><span class="pub">+</span> Pop() : STRING</div></div>
+      </div>
+      <div>
+        <div class="code" style=""><div class="code-lbl">Main program</div>Plates = <span class="f">Stack</span>(<span class="v">5</span>)
+Plates.<span class="f">Push</span>(<span class="s">"Red"</span>)
+Plates.<span class="f">Push</span>(<span class="s">"Blue"</span>)
+<span class="f">print</span>(Plates.<span class="f">Pop</span>())    <span class="cm"># Blue</span>
+<span class="f">print</span>(Plates.<span class="f">Pop</span>())    <span class="cm"># Red</span>
+<span class="f">print</span>(Plates.<span class="f">Pop</span>())    <span class="cm"># None</span></div>
+      </div>
+    </div>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#9966FF;">Order matters:</strong> in Push, add 1 to TopPointer <em>before</em> storing the item. In Pop, read the item <em>before</em> taking 1 off TopPointer. Swapping these lines is the most common stack bug.</div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Write the method <code>Pop()</code> for the Stack class. It returns the item at the top of the stack, or <code>None</code> if the stack is empty. <span class="exq-mk">[4]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(2,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans2"><strong>Mark scheme — one mark for each point:</strong><ul><li>Method header <code>def Pop(self):</code></li><li>Checks whether the stack is empty (TopPointer == -1 / IsEmpty()) and returns None</li><li>Reads the item at <code>self.__Items[self.__TopPointer]</code></li><li>Decreases TopPointer by 1 <em>and</em> returns the item</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> Each mark is for one step. Even if you cannot remember all of it, the header and the empty check are easy marks.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 4 — Multiple choice — trace the code</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Using the Stack class, what is output?</div>
+<div class="code" style="margin-bottom:14px;">S = <span class="f">Stack</span>(<span class="v">5</span>)
+S.<span class="f">Push</span>(<span class="s">"A"</span>)
+S.<span class="f">Push</span>(<span class="s">"B"</span>)
+S.<span class="f">Push</span>(<span class="s">"C"</span>)
+<span class="f">print</span>(S.<span class="f">Pop</span>())
+S.<span class="f">Push</span>(<span class="s">"D"</span>)
+<span class="f">print</span>(S.<span class="f">Pop</span>(), S.<span class="f">Pop</span>())</div>
+    <div id="opts4">
+      <div class="opt" onclick="pickOpt(4,'a',this)">a) C then D B</div>
+      <div class="opt" onclick="pickOpt(4,'b',this)">b) C then B D</div>
+      <div class="opt" onclick="pickOpt(4,'c',this)">c) A then D B</div>
+      <div class="opt" onclick="pickOpt(4,'d',this)">d) C then D C</div>
+    </div>
+    <div class="fb" id="fb4"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 5 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Complete the condition for <code>IsFull()</code> in a stack of size <code>Size</code>:<br><code>return self.__TopPointer == </code><span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span></div>
+    <div id="opts5w">
+      <span class="wopt" onclick="pickWopt(5,'a',this)">self.__Size</span>
+      <span class="wopt" onclick="pickWopt(5,'b',this)">self.__Size - 1</span>
+      <span class="wopt" onclick="pickWopt(5,'c',this)">0</span>
+      <span class="wopt" onclick="pickWopt(5,'d',this)">-1</span>
+    </div>
+    <div class="fb" id="fb5"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 6 — Complete Push()</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Complete the <code>Push()</code> method. Two chips are not needed.</div>
+    <div class="drag-bank" id="bank6">
+      <div class="drag-chip" draggable="true">return True</div>
+      <div class="drag-chip" draggable="true">self.__TopPointer = self.__TopPointer + 1</div>
+      <div class="drag-chip" draggable="true">self.IsFull()</div>
+      <div class="drag-chip" draggable="true">self.__Items[self.__TopPointer] = NewItem</div>
+      <div class="drag-chip" draggable="true">self.IsEmpty()</div>
+      <div class="drag-chip" draggable="true">self.__TopPointer = self.__TopPointer - 1</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      def Push(self, NewItem):<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;if <span id="dz6a" class="drop-zone" style="min-width:160px;">?</span>:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return False<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz6b" class="drop-zone" style="min-width:380px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz6c" class="drop-zone" style="min-width:380px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz6d" class="drop-zone" style="min-width:140px;">?</span>
+    </div>
+    <button class="check-btn" id="btn6" onclick="checkDrop6()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res6"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 7 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Click True or False for each statement about the Stack class.</div>
+    <div class="tf-row" id="tf1">
+      <div class="tf-stmt">A new, empty stack has <code>TopPointer = -1</code>.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(1,true,true)">True</button><button class="tf-btn" onclick="doTF(1,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf2">
+      <div class="tf-stmt">Pop() deletes the item from the array, so the array gets shorter.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(2,true,false)">True</button><button class="tf-btn" onclick="doTF(2,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf3">
+      <div class="tf-stmt">Push() returns False when the stack is full, so the main program can tell the push failed.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(3,true,true)">True</button><button class="tf-btn" onclick="doTF(3,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf4">
+      <div class="tf-stmt">Main program code could safely write <code>Plates.__TopPointer = 0</code> to empty the stack.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(4,true,false)">True</button><button class="tf-btn" onclick="doTF(4,false,false)">False</button></div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 3 — QUEUE
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Queue</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~15 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> A <strong>queue</strong> is FIFO. Items join at the <strong>tail</strong> and leave from the <strong>head</strong>. In a <strong>circular queue</strong> the pointers wrap round to 0 when they pass the end of the array, so freed spaces at the front are reused. <code>NumberOfItems</code> tells you if it is empty (0) or full (equal to Size).</div>
+    <div class="code" style="font-size:11pt;margin-bottom:16px;"><div class="code-lbl">Python — a circular Queue class</div><span class="k">class</span> <span class="f">Queue</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self, Size):
+        self.__Items = [<span class="s">""</span>] * Size
+        self.__Size = Size
+        self.__Head = <span class="v">0</span>
+        self.__Tail = -<span class="v">1</span>
+        self.__NumberOfItems = <span class="v">0</span>
+
+    <span class="k">def</span> <span class="f">Enqueue</span>(self, NewItem):
+        <span class="k">if</span> self.__NumberOfItems == self.__Size:
+            <span class="k">return</span> <span class="k">False</span>                   <span class="cm"># full</span>
+        self.__Tail = (self.__Tail + <span class="v">1</span>) % self.__Size
+        self.__Items[self.__Tail] = NewItem
+        self.__NumberOfItems = self.__NumberOfItems + <span class="v">1</span>
+        <span class="k">return</span> <span class="k">True</span>
+
+    <span class="k">def</span> <span class="f">Dequeue</span>(self):
+        <span class="k">if</span> self.__NumberOfItems == <span class="v">0</span>:
+            <span class="k">return</span> <span class="k">None</span>                    <span class="cm"># empty</span>
+        Item = self.__Items[self.__Head]
+        self.__Head = (self.__Head + <span class="v">1</span>) % self.__Size
+        self.__NumberOfItems = self.__NumberOfItems - <span class="v">1</span>
+        <span class="k">return</span> Item</div>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div>
+        <div style="background:#f5f5f5;border:1px solid #d0d0d0;border-radius:8px;padding:16px 18px;margin-bottom:12px;">
+          <div style="font-size:13pt;font-weight:700;color:#333;margin-bottom:8px;">How the wrap-around works</div>
+          <p style="margin:0 0 8px;font-size:13pt;">In a queue of size 5, the indexes are 0 to 4. When Tail is 4:</p>
+          <p style="margin:0 0 8px;font-size:13pt;"><code>(4 + 1) % 5</code> = <code>5 % 5</code> = <strong>0</strong></p>
+          <p style="margin:0;font-size:13pt;">So the next item goes back to index 0. The <code>%</code> (MOD) operator does the wrapping for both pointers.</p>
+        </div>
+        <div class="code" style=""><div class="code-lbl">Main program</div>Printer = <span class="f">Queue</span>(<span class="v">3</span>)
+Printer.<span class="f">Enqueue</span>(<span class="s">"Job1"</span>)
+Printer.<span class="f">Enqueue</span>(<span class="s">"Job2"</span>)
+<span class="f">print</span>(Printer.<span class="f">Dequeue</span>())   <span class="cm"># Job1</span></div>
+      </div>
+    </div>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#9966FF;">Why start Tail at -1?</strong> Enqueue moves Tail <em>before</em> storing, so the first item goes to index (-1 + 1) % Size = 0, the same index as Head.</div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Describe how the <code>Enqueue()</code> method adds an item to the circular queue. <span class="exq-mk">[3]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(3,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans3"><strong>Mark scheme — one mark for each point:</strong><ul><li>Checks the queue is not full (NumberOfItems equals Size) and returns False if it is</li><li>Moves Tail on by one, wrapping to 0 using <code>(Tail + 1) % Size</code></li><li>Stores the item at the Tail position and adds 1 to NumberOfItems</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> "Describe" does not need code, but you can name the attributes. A full answer covers the check, the pointer, and the storing.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 8 — Multiple choice — trace the wrap-around</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">A queue has size 3. After this code runs, at which index of <code>Items</code> is "D" stored?</div>
+<div class="code" style="margin-bottom:14px;">Q = <span class="f">Queue</span>(<span class="v">3</span>)
+Q.<span class="f">Enqueue</span>(<span class="s">"A"</span>)
+Q.<span class="f">Enqueue</span>(<span class="s">"B"</span>)
+Q.<span class="f">Enqueue</span>(<span class="s">"C"</span>)
+Q.<span class="f">Dequeue</span>()
+Q.<span class="f">Enqueue</span>(<span class="s">"D"</span>)</div>
+    <div id="opts8">
+      <div class="opt" onclick="pickOpt(8,'a',this)">a) 3</div>
+      <div class="opt" onclick="pickOpt(8,'b',this)">b) 0</div>
+      <div class="opt" onclick="pickOpt(8,'c',this)">c) 2</div>
+      <div class="opt" onclick="pickOpt(8,'d',this)">d) It is not stored, because the queue is full</div>
+    </div>
+    <div class="fb" id="fb8"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 9 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">In a circular queue of size 6, the Head pointer is 5. After one item is dequeued, Head becomes <code>(5 + 1) % 6</code> = <span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span>.</div>
+    <div id="opts9w">
+      <span class="wopt" onclick="pickWopt(9,'a',this)">6</span>
+      <span class="wopt" onclick="pickWopt(9,'b',this)">5</span>
+      <span class="wopt" onclick="pickWopt(9,'c',this)">0</span>
+      <span class="wopt" onclick="pickWopt(9,'d',this)">1</span>
+    </div>
+    <div class="fb" id="fb9"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 10 — Complete Dequeue()</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Complete the <code>Dequeue()</code> method. Two chips are not needed.</div>
+    <div class="drag-bank" id="bank10">
+      <div class="drag-chip" draggable="true">self.__NumberOfItems = self.__NumberOfItems - 1</div>
+      <div class="drag-chip" draggable="true">Item = self.__Items[self.__Head]</div>
+      <div class="drag-chip" draggable="true">self.__Head = (self.__Head + 1) % self.__Size</div>
+      <div class="drag-chip" draggable="true">self.__NumberOfItems == 0</div>
+      <div class="drag-chip" draggable="true">Item = self.__Items[self.__Tail]</div>
+      <div class="drag-chip" draggable="true">self.__NumberOfItems == self.__Size</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      def Dequeue(self):<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;if <span id="dz10a" class="drop-zone" style="min-width:280px;">?</span>:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return None<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz10b" class="drop-zone" style="min-width:340px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz10c" class="drop-zone" style="min-width:420px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz10d" class="drop-zone" style="min-width:440px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;return Item
+    </div>
+    <button class="check-btn" id="btn10" onclick="checkDrop10()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res10"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 11 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Click True or False for each statement about the Queue class.</div>
+    <div class="tf-row" id="tf5">
+      <div class="tf-stmt">Enqueue() changes the Tail pointer and Dequeue() changes the Head pointer.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(5,true,true)">True</button><button class="tf-btn" onclick="doTF(5,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf6">
+      <div class="tf-stmt">In a circular queue, the queue is full when Tail equals Size - 1.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(6,true,false)">True</button><button class="tf-btn" onclick="doTF(6,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf7">
+      <div class="tf-stmt"><code>%</code> gives the remainder after division, so <code>7 % 5</code> is 2.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(7,true,true)">True</button><button class="tf-btn" onclick="doTF(7,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf8">
+      <div class="tf-stmt">A circular queue reuses the spaces at the front of the array after items are dequeued.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(8,true,true)">True</button><button class="tf-btn" onclick="doTF(8,false,true)">False</button></div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 4 — LINKED LIST
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Linked List</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~20 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> A <strong>linked list</strong> stores each item in a <strong>node</strong> with a pointer to the next node. In OOP, a <code>Node</code> class holds one item and its <code>NextNode</code> pointer. The <code>LinkedList</code> class <em>contains</em> an array of Node objects, a <code>Head</code> pointer to the first node in the list, and a <code>Free</code> pointer to the first unused node.</div>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div class="code" style="font-size:11pt;"><div class="code-lbl">Python — the Node class</div><span class="k">class</span> <span class="f">Node</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self, Data, NextNode):
+        self.__Data = Data
+        self.__NextNode = NextNode
+
+    <span class="k">def</span> <span class="f">GetData</span>(self):
+        <span class="k">return</span> self.__Data
+
+    <span class="k">def</span> <span class="f">GetNext</span>(self):
+        <span class="k">return</span> self.__NextNode
+
+    <span class="k">def</span> <span class="f">SetData</span>(self, NewData):
+        self.__Data = NewData
+
+    <span class="k">def</span> <span class="f">SetNext</span>(self, NewNext):
+        self.__NextNode = NewNext</div>
+      <div style="background:#f5f5f5;border:1px solid #d0d0d0;border-radius:8px;padding:16px 18px;">
+        <div style="font-size:13pt;font-weight:700;color:#333;margin-bottom:8px;">A new LinkedList(4)</div>
+        <table class="ntbl"><tr><th>Index</th><th>Data</th><th>NextNode</th></tr><tr><td class="ix">0</td><td>""</td><td>1</td></tr><tr><td class="ix">1</td><td>""</td><td>2</td></tr><tr><td class="ix">2</td><td>""</td><td>3</td></tr><tr><td class="ix">3</td><td>""</td><td>-1</td></tr></table>
+        <div style="text-align:center;margin-top:10px;"><span class="ptr">Head = -1</span><span class="ptr">Free = 0</span></div>
+        <p style="margin:10px 0 0;font-size:12.5pt;">All four nodes start in the <strong>free list</strong>, linked 0 &rarr; 1 &rarr; 2 &rarr; 3. The list itself is empty.</p>
+      </div>
+    </div>
+    <div class="code" style="font-size:11pt;margin-bottom:16px;"><div class="code-lbl">Python — the LinkedList class</div><span class="k">class</span> <span class="f">LinkedList</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self, Size):
+        self.__Nodes = []
+        <span class="k">for</span> Index <span class="k">in</span> <span class="f">range</span>(Size):
+            self.__Nodes.<span class="f">append</span>(<span class="f">Node</span>(<span class="s">""</span>, Index + <span class="v">1</span>))
+        self.__Nodes[Size - <span class="v">1</span>].<span class="f">SetNext</span>(-<span class="v">1</span>)
+        self.__Head = -<span class="v">1</span>                 <span class="cm"># list is empty</span>
+        self.__Free = <span class="v">0</span>                  <span class="cm"># first free node</span>
+
+    <span class="k">def</span> <span class="f">AddToFront</span>(self, NewData):
+        <span class="k">if</span> self.__Free == -<span class="v">1</span>:
+            <span class="k">return</span> <span class="k">False</span>                 <span class="cm"># no free nodes</span>
+        NewIndex = self.__Free
+        self.__Free = self.__Nodes[NewIndex].<span class="f">GetNext</span>()
+        self.__Nodes[NewIndex].<span class="f">SetData</span>(NewData)
+        self.__Nodes[NewIndex].<span class="f">SetNext</span>(self.__Head)
+        self.__Head = NewIndex
+        <span class="k">return</span> <span class="k">True</span>
+
+    <span class="k">def</span> <span class="f">Traverse</span>(self):
+        Current = self.__Head
+        <span class="k">while</span> Current != -<span class="v">1</span>:
+            <span class="f">print</span>(self.__Nodes[Current].<span class="f">GetData</span>())
+            Current = self.__Nodes[Current].<span class="f">GetNext</span>()</div>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#9966FF;">Objects talk through methods:</strong> LinkedList cannot read a node's private <code>__NextNode</code>, so it uses <code>GetNext()</code> and <code>SetNext()</code>. Containment and encapsulation together.</div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Explain why the LinkedList class needs a <code>Free</code> pointer as well as a <code>Head</code> pointer. <span class="exq-mk">[2]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(4,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans4"><strong>Mark scheme — one mark for each point:</strong><ul><li>Head points to the first node that is in use / the start of the list</li><li>Free points to the first unused node, so AddToFront() knows where to store new data without searching the array</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> Two pointers, two marks: say what <em>each</em> one points to.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 12 — Multiple choice — follow the pointers</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">A LinkedList object holds these nodes, and <code>Head = 2</code>. What does <code>Traverse()</code> output?</div>
+    <div style="margin-bottom:14px;"><table class="ntbl"><tr><th>Index</th><th>Data</th><th>NextNode</th></tr><tr><td class="ix">0</td><td>"Cat"</td><td>3</td></tr><tr><td class="ix">1</td><td>"Dog"</td><td>-1</td></tr><tr><td class="ix">2</td><td>"Ant"</td><td>0</td></tr><tr><td class="ix">3</td><td>"Bee"</td><td>1</td></tr></table></div>
+    <div id="opts12">
+      <div class="opt" onclick="pickOpt(12,'a',this)">a) Cat, Dog, Ant, Bee</div>
+      <div class="opt" onclick="pickOpt(12,'b',this)">b) Ant, Cat, Bee, Dog</div>
+      <div class="opt" onclick="pickOpt(12,'c',this)">c) Ant, Bee, Cat, Dog</div>
+      <div class="opt" onclick="pickOpt(12,'d',this)">d) Dog, Bee, Cat, Ant</div>
+    </div>
+    <div class="fb" id="fb12"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 13 — Put Search() in order</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag the lines into order to build a method that returns True if <code>Target</code> is in the list and False if not. The indentation is shown by the slots.</div>
+    <div class="drag-bank" id="bank13">
+      <div class="drag-chip" draggable="true">return False</div>
+      <div class="drag-chip" draggable="true">if self.__Nodes[Current].GetData() == Target:</div>
+      <div class="drag-chip" draggable="true">def Search(self, Target):</div>
+      <div class="drag-chip" draggable="true">Current = self.__Nodes[Current].GetNext()</div>
+      <div class="drag-chip" draggable="true">Current = self.__Head</div>
+      <div class="drag-chip" draggable="true">return True</div>
+      <div class="drag-chip" draggable="true">while Current != -1:</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;overflow-x:auto;">
+      <div class="slot-line"><span class="ln">1</span><span id="dz13a" class="drop-zone" style="min-width:470px;">?</span></div>
+      <div class="slot-line"><span class="ln">2</span><span style="width:36px;"></span><span id="dz13b" class="drop-zone" style="min-width:434px;">?</span></div>
+      <div class="slot-line"><span class="ln">3</span><span style="width:36px;"></span><span id="dz13c" class="drop-zone" style="min-width:434px;">?</span></div>
+      <div class="slot-line"><span class="ln">4</span><span style="width:72px;"></span><span id="dz13d" class="drop-zone" style="min-width:398px;">?</span></div>
+      <div class="slot-line"><span class="ln">5</span><span style="width:108px;"></span><span id="dz13e" class="drop-zone" style="min-width:362px;">?</span></div>
+      <div class="slot-line"><span class="ln">6</span><span style="width:72px;"></span><span id="dz13f" class="drop-zone" style="min-width:398px;">?</span></div>
+      <div class="slot-line"><span class="ln">7</span><span style="width:36px;"></span><span id="dz13g" class="drop-zone" style="min-width:434px;">?</span></div>
+    </div>
+    <button class="check-btn" id="btn13" onclick="checkDrop13()">&#10003; Check my order</button>
+    <div class="drag-result" id="res13"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 14 — Complete AddToFront()</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Complete <code>AddToFront()</code>, which takes the first free node and puts it at the front of the list. Two chips are not needed.</div>
+    <div class="drag-bank" id="bank14">
+      <div class="drag-chip" draggable="true">self.__Head = NewIndex</div>
+      <div class="drag-chip" draggable="true">self.__Free = self.__Nodes[NewIndex].GetNext()</div>
+      <div class="drag-chip" draggable="true">self.__Nodes[NewIndex].SetNext(self.__Head)</div>
+      <div class="drag-chip" draggable="true">NewIndex = self.__Free</div>
+      <div class="drag-chip" draggable="true">self.__Head = self.__Free</div>
+      <div class="drag-chip" draggable="true">self.__Nodes[NewIndex].SetNext(-1)</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      def AddToFront(self, NewData):<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;if self.__Free == -1:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return False<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz14a" class="drop-zone" style="min-width:260px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz14b" class="drop-zone" style="min-width:460px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;self.__Nodes[NewIndex].SetData(NewData)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz14c" class="drop-zone" style="min-width:460px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span id="dz14d" class="drop-zone" style="min-width:260px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;return True
+    </div>
+    <button class="check-btn" id="btn14" onclick="checkDrop14()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res14"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 15 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Click True or False for each statement about the linked list classes.</div>
+    <div class="tf-row" id="tf9">
+      <div class="tf-stmt">LinkedList and Node have a containment ("has-a") relationship.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(9,true,true)">True</button><button class="tf-btn" onclick="doTF(9,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf10">
+      <div class="tf-stmt">Traverse() visits the nodes in index order: 0, 1, 2, 3…</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(10,true,false)">True</button><button class="tf-btn" onclick="doTF(10,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf11">
+      <div class="tf-stmt">If <code>Free = -1</code>, there are no unused nodes left, so AddToFront() returns False.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(11,true,true)">True</button><button class="tf-btn" onclick="doTF(11,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf12">
+      <div class="tf-stmt">Inside LinkedList, <code>self.__Nodes[Current].__Data</code> is the correct way to read a node's data.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(12,true,false)">True</button><button class="tf-btn" onclick="doTF(12,false,false)">False</button></div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 5 — BINARY TREE
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Binary Tree</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~20 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> In a <strong>binary search tree</strong> each node has a <strong>left</strong> and a <strong>right</strong> pointer. Values smaller than a node go to its left; values larger (or equal) go to its right. A <code>TreeNode</code> class holds the data and both pointers; the <code>BinaryTree</code> class <em>contains</em> an array of TreeNode objects plus a <code>Root</code> pointer.</div>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div class="code" style="font-size:11pt;"><div class="code-lbl">Python — the TreeNode class</div><span class="k">class</span> <span class="f">TreeNode</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self, Data):
+        self.__Data = Data
+        self.__Left = -<span class="v">1</span>
+        self.__Right = -<span class="v">1</span>
+
+    <span class="k">def</span> <span class="f">GetData</span>(self):
+        <span class="k">return</span> self.__Data
+
+    <span class="k">def</span> <span class="f">GetLeft</span>(self):
+        <span class="k">return</span> self.__Left
+
+    <span class="k">def</span> <span class="f">GetRight</span>(self):
+        <span class="k">return</span> self.__Right
+
+    <span class="k">def</span> <span class="f">SetLeft</span>(self, NewLeft):
+        self.__Left = NewLeft
+
+    <span class="k">def</span> <span class="f">SetRight</span>(self, NewRight):
+        self.__Right = NewRight</div>
+      <div style="background:#f5f5f5;border:1px solid #d0d0d0;border-radius:8px;padding:16px 18px;">
+        <div style="font-size:13pt;font-weight:700;color:#333;margin-bottom:8px;">After inserting 50, 30, 70, 20, 40</div>
+        <svg viewBox="0 0 300 170" width="100%" style="max-width:300px;display:block;margin:0 auto 10px;" aria-label="binary tree with root 50">
+          <g stroke="#007BA6" stroke-width="2"><line x1="150" y1="28" x2="80" y2="80"/><line x1="150" y1="28" x2="220" y2="80"/><line x1="80" y1="80" x2="40" y2="135"/><line x1="80" y1="80" x2="120" y2="135"/></g>
+          <g font-family="Lato,sans-serif" font-size="15" font-weight="700" text-anchor="middle">
+            <circle cx="150" cy="28" r="20" fill="#007BA6"/><text x="150" y="33" fill="#fff">50</text>
+            <circle cx="80" cy="80" r="20" fill="#e3f2fd" stroke="#007BA6" stroke-width="2"/><text x="80" y="85" fill="#007BA6">30</text>
+            <circle cx="220" cy="80" r="20" fill="#e3f2fd" stroke="#007BA6" stroke-width="2"/><text x="220" y="85" fill="#007BA6">70</text>
+            <circle cx="40" cy="135" r="20" fill="#e3f2fd" stroke="#007BA6" stroke-width="2"/><text x="40" y="140" fill="#007BA6">20</text>
+            <circle cx="120" cy="135" r="20" fill="#e3f2fd" stroke="#007BA6" stroke-width="2"/><text x="120" y="140" fill="#007BA6">40</text>
+          </g>
+        </svg>
+        <table class="ntbl"><tr><th>Index</th><th>Data</th><th>Left</th><th>Right</th></tr><tr><td class="ix">0</td><td>50</td><td>1</td><td>2</td></tr><tr><td class="ix">1</td><td>30</td><td>3</td><td>4</td></tr><tr><td class="ix">2</td><td>70</td><td>-1</td><td>-1</td></tr><tr><td class="ix">3</td><td>20</td><td>-1</td><td>-1</td></tr><tr><td class="ix">4</td><td>40</td><td>-1</td><td>-1</td></tr></table>
+        <div style="text-align:center;margin-top:8px;"><span class="ptr">Root = 0</span><span class="ptr">NextFree = 5</span></div>
+      </div>
+    </div>
+    <div class="code" style="font-size:11pt;margin-bottom:16px;"><div class="code-lbl">Python — the BinaryTree class</div><span class="k">class</span> <span class="f">BinaryTree</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self, Size):
+        self.__Nodes = [<span class="k">None</span>] * Size
+        self.__Root = -<span class="v">1</span>
+        self.__NextFree = <span class="v">0</span>
+
+    <span class="k">def</span> <span class="f">GetRoot</span>(self):
+        <span class="k">return</span> self.__Root
+
+    <span class="k">def</span> <span class="f">Insert</span>(self, NewData):
+        <span class="k">if</span> self.__NextFree == <span class="f">len</span>(self.__Nodes):
+            <span class="k">return</span> <span class="k">False</span>                       <span class="cm"># tree is full</span>
+        NewIndex = self.__NextFree
+        self.__Nodes[NewIndex] = <span class="f">TreeNode</span>(NewData)
+        self.__NextFree = self.__NextFree + <span class="v">1</span>
+        <span class="k">if</span> self.__Root == -<span class="v">1</span>:
+            self.__Root = NewIndex             <span class="cm"># first node</span>
+            <span class="k">return</span> <span class="k">True</span>
+        Current = self.__Root
+        Placed = <span class="k">False</span>
+        <span class="k">while</span> <span class="k">not</span> Placed:
+            <span class="k">if</span> NewData &lt; self.__Nodes[Current].<span class="f">GetData</span>():
+                <span class="k">if</span> self.__Nodes[Current].<span class="f">GetLeft</span>() == -<span class="v">1</span>:
+                    self.__Nodes[Current].<span class="f">SetLeft</span>(NewIndex)
+                    Placed = <span class="k">True</span>
+                <span class="k">else</span>:
+                    Current = self.__Nodes[Current].<span class="f">GetLeft</span>()
+            <span class="k">else</span>:
+                <span class="k">if</span> self.__Nodes[Current].<span class="f">GetRight</span>() == -<span class="v">1</span>:
+                    self.__Nodes[Current].<span class="f">SetRight</span>(NewIndex)
+                    Placed = <span class="k">True</span>
+                <span class="k">else</span>:
+                    Current = self.__Nodes[Current].<span class="f">GetRight</span>()
+        <span class="k">return</span> <span class="k">True</span>
+
+    <span class="k">def</span> <span class="f">InOrder</span>(self, Index):
+        <span class="k">if</span> Index != -<span class="v">1</span>:
+            self.<span class="f">InOrder</span>(self.__Nodes[Index].<span class="f">GetLeft</span>())
+            <span class="f">print</span>(self.__Nodes[Index].<span class="f">GetData</span>())
+            self.<span class="f">InOrder</span>(self.__Nodes[Index].<span class="f">GetRight</span>())</div>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#9966FF;">Recursion for traversal:</strong> <code>InOrder()</code> calls itself on the left subtree, outputs the node, then calls itself on the right subtree. The <strong>base case</strong> is <code>Index == -1</code> (no node), where it does nothing. In-order traversal of a binary search tree outputs the values in ascending order. Call it from the main program with <code>Tree.InOrder(Tree.GetRoot())</code>.</div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Describe how the <code>Insert()</code> method finds the correct position for a new value. <span class="exq-mk">[3]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(5,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans5"><strong>Mark scheme — one mark for each point:</strong><ul><li>Starts at the Root node (Current = Root)</li><li>Compares the new value with the current node: if smaller, follows the Left pointer; otherwise follows the Right pointer</li><li>Repeats until the pointer it needs is -1, then sets that pointer to the new node's index</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> Use the words "left", "right", "root" and "-1" in your answer. They are what the mark scheme looks for.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 16 — Multiple choice — trace the traversal</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">The values 50, 30, 70, 20, 40, 60 are inserted into an empty BinaryTree in that order. What does <code>Tree.InOrder(Tree.GetRoot())</code> output?</div>
+    <div id="opts16">
+      <div class="opt" onclick="pickOpt(16,'a',this)">a) 50, 30, 70, 20, 40, 60</div>
+      <div class="opt" onclick="pickOpt(16,'b',this)">b) 20, 30, 40, 50, 60, 70</div>
+      <div class="opt" onclick="pickOpt(16,'c',this)">c) 20, 40, 30, 60, 70, 50</div>
+      <div class="opt" onclick="pickOpt(16,'d',this)">d) 50, 30, 20, 40, 70, 60</div>
+    </div>
+    <div class="fb" id="fb16"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#8644; Activity 17 — Sort: left or right of the root?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">A tree has the root <strong>50</strong>. Drag each value to the subtree it will end up in when it is inserted.</div>
+    <div class="drag-bank" id="bank17">
+      <div class="drag-chip" draggable="true">25</div>
+      <div class="drag-chip" draggable="true">75</div>
+      <div class="drag-chip" draggable="true">49</div>
+      <div class="drag-chip" draggable="true">50</div>
+      <div class="drag-chip" draggable="true">10</div>
+      <div class="drag-chip" draggable="true">90</div>
+    </div>
+    <div class="g2" style="margin-bottom:12px;">
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Left subtree (less than 50)</div>
+        <div id="sort17-0" class="sort-zone drag-bank" style="border-color:#007BA6;background:#f0f8ff;min-height:110px;flex-direction:column;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#e65100;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Right subtree (50 or more)</div>
+        <div id="sort17-1" class="sort-zone drag-bank" style="border-color:#e65100;background:#fffaf3;min-height:110px;flex-direction:column;"></div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn17" onclick="checkSort17()">&#10003; Check my sort</button>
+    <div class="drag-result" id="res17"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 18 — Complete the left branch of Insert()</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Complete the part of <code>Insert()</code> that handles a value smaller than the current node. Two chips are not needed.</div>
+    <div class="drag-bank" id="bank18">
+      <div class="drag-chip" draggable="true">self.__Nodes[Current].SetLeft(NewIndex)</div>
+      <div class="drag-chip" draggable="true">Current = self.__Nodes[Current].GetLeft()</div>
+      <div class="drag-chip" draggable="true">self.__Nodes[Current].GetLeft() == -1</div>
+      <div class="drag-chip" draggable="true">Placed = True</div>
+      <div class="drag-chip" draggable="true">self.__Nodes[Current].SetRight(NewIndex)</div>
+      <div class="drag-chip" draggable="true">self.__Root = NewIndex</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      if NewData &lt; self.__Nodes[Current].GetData():<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;if <span id="dz18a" class="drop-zone" style="min-width:380px;">?</span>:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="dz18b" class="drop-zone" style="min-width:380px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="dz18c" class="drop-zone" style="min-width:160px;">?</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;else:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="dz18d" class="drop-zone" style="min-width:400px;">?</span>
+    </div>
+    <button class="check-btn" id="btn18" onclick="checkDrop18()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res18"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 19 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">The recursive method <code>InOrder(self, Index)</code> must stop when there is no node to visit. Its first line is:<br><code>if Index </code><span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span><code> -1:</code></div>
+    <div id="opts19w">
+      <span class="wopt" onclick="pickWopt(19,'a',this)">==</span>
+      <span class="wopt" onclick="pickWopt(19,'b',this)">!=</span>
+      <span class="wopt" onclick="pickWopt(19,'c',this)">&lt;</span>
+      <span class="wopt" onclick="pickWopt(19,'d',this)">=</span>
+    </div>
+    <div class="fb" id="fb19"></div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 6 — EXAM PRACTICE
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">6</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Exam Practice: Choosing &amp; Debugging ADTs</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~10 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;">Exam questions on ADTs usually ask you to <strong>choose</strong> the right ADT for a scenario, <strong>trace</strong> the pointers, or <strong>write</strong> one method. Use this checklist every time you write an ADT method.</p>
+    <div style="overflow-x:auto;margin-bottom:16px;">
+      <table class="cx-tbl">
+        <tr><th>Check</th><th>Why it matters</th></tr>
+        <tr><td>Is <code>self</code> the first parameter?</td><td>Without it, Python raises a TypeError when the method is called.</td></tr>
+        <tr><td>Is every attribute written <code>self.__Name</code>?</td><td>Without <code>self.</code> you create a local variable that is lost.</td></tr>
+        <tr><td>Have you checked for <strong>full</strong> or <strong>empty</strong> first?</td><td>Easy marks, and it stops the pointers going outside the array.</td></tr>
+        <tr><td>Are the pointer steps in the right <strong>order</strong>?</td><td>Push: move then store. Pop: read then move. AddToFront: update Free before overwriting the pointer.</td></tr>
+        <tr><td>Do you use getters and setters on Node objects?</td><td>A node's attributes are private to the Node class.</td></tr>
+        <tr><td>Does the method <code>return</code> what it should?</td><td>Pop and Dequeue return the item; Push and Enqueue return True or False.</td></tr>
+      </table>
+    </div>
+    <div style="border-left:4px solid #007BA6;background:#e3f2fd;padding:12px 16px;border-radius:0 6px 6px 0;"><strong style="color:#007BA6;">Exam technique:</strong> trace with a table. Write down every pointer (TopPointer, Head, Tail, Free, Root) and update it line by line. Most tracing errors come from doing it in your head.</div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#8644; Activity 20 — Sort: which ADT fits the scenario?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag each scenario to the ADT that would be the best choice.</div>
+    <div class="drag-bank" id="bank20">
+      <div class="drag-chip" draggable="true">Undo button in a text editor</div>
+      <div class="drag-chip" draggable="true">Print jobs sent to a shared printer</div>
+      <div class="drag-chip" draggable="true">Checking brackets match in an expression</div>
+      <div class="drag-chip" draggable="true">Customers waiting for a phone helpline</div>
+      <div class="drag-chip" draggable="true">Searching a large sorted set of usernames quickly</div>
+      <div class="drag-chip" draggable="true">A playlist where songs are often added at the front</div>
+    </div>
+    <div class="g2" style="margin-bottom:12px;">
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Stack</div>
+        <div id="sort20-0" class="sort-zone drag-bank" style="border-color:#007BA6;background:#f0f8ff;min-height:110px;flex-direction:column;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#e65100;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Queue</div>
+        <div id="sort20-1" class="sort-zone drag-bank" style="border-color:#e65100;background:#fffaf3;min-height:110px;flex-direction:column;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#388e3c;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Linked list</div>
+        <div id="sort20-2" class="sort-zone drag-bank" style="border-color:#388e3c;background:#f0f8f0;min-height:110px;flex-direction:column;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#6a1b9a;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Binary tree</div>
+        <div id="sort20-3" class="sort-zone drag-bank" style="border-color:#6a1b9a;background:#f7f0fa;min-height:110px;flex-direction:column;"></div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn20" onclick="checkSort20()">&#10003; Check my sort</button>
+    <div class="drag-result" id="res20"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 21 — Match the bug to its fix</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Each symptom came from a student's ADT class. Use the dropdowns to choose the fix.</div>
+    <div id="match2">
+      <div class="match-row"><div class="match-term">Pop() returns the item below the top</div><select class="match-sel" data-ans="order"><option value="">— choose —</option><option value="get">Call the getter GetData() instead</option><option value="full">Check IsFull() before moving TopPointer</option><option value="mod">Wrap the pointer with % self.__Size</option><option value="order">Read the item before decreasing TopPointer</option><option value="next">Move Current on with GetNext() inside the loop</option></select></div>
+      <div class="match-row"><div class="match-term">IndexError when pushing onto a full stack</div><select class="match-sel" data-ans="full"><option value="">— choose —</option><option value="get">Call the getter GetData() instead</option><option value="full">Check IsFull() before moving TopPointer</option><option value="mod">Wrap the pointer with % self.__Size</option><option value="order">Read the item before decreasing TopPointer</option><option value="next">Move Current on with GetNext() inside the loop</option></select></div>
+      <div class="match-row"><div class="match-term">Traverse() never stops</div><select class="match-sel" data-ans="next"><option value="">— choose —</option><option value="get">Call the getter GetData() instead</option><option value="full">Check IsFull() before moving TopPointer</option><option value="mod">Wrap the pointer with % self.__Size</option><option value="order">Read the item before decreasing TopPointer</option><option value="next">Move Current on with GetNext() inside the loop</option></select></div>
+      <div class="match-row"><div class="match-term">AttributeError reading Node.__Data in LinkedList</div><select class="match-sel" data-ans="get"><option value="">— choose —</option><option value="get">Call the getter GetData() instead</option><option value="full">Check IsFull() before moving TopPointer</option><option value="mod">Wrap the pointer with % self.__Size</option><option value="order">Read the item before decreasing TopPointer</option><option value="next">Move Current on with GetNext() inside the loop</option></select></div>
+      <div class="match-row"><div class="match-term">Queue writes past the end of the array</div><select class="match-sel" data-ans="mod"><option value="">— choose —</option><option value="get">Call the getter GetData() instead</option><option value="full">Check IsFull() before moving TopPointer</option><option value="mod">Wrap the pointer with % self.__Size</option><option value="order">Read the item before decreasing TopPointer</option><option value="next">Move Current on with GetNext() inside the loop</option></select></div>
+    </div>
+    <button class="match-btn" id="match2-btn" onclick="checkMatch2()">&#10003; Check my answers</button>
+    <div class="match-result" id="match2-res"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 22 — Multiple choice — trace the search</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Using the BinaryTree class, what is output?</div>
+<div class="code" style="margin-bottom:14px;"><span class="k">def</span> <span class="f">Search</span>(self, Target):              <span class="cm"># method of BinaryTree</span>
+    Current = self.__Root
+    <span class="k">while</span> Current != -<span class="v">1</span>:
+        <span class="k">if</span> self.__Nodes[Current].<span class="f">GetData</span>() == Target:
+            <span class="k">return</span> <span class="k">True</span>
+        <span class="k">if</span> Target &lt; self.__Nodes[Current].<span class="f">GetData</span>():
+            Current = self.__Nodes[Current].<span class="f">GetLeft</span>()
+        <span class="k">else</span>:
+            Current = self.__Nodes[Current].<span class="f">GetRight</span>()
+    <span class="k">return</span> <span class="k">False</span>
+
+Tree = <span class="f">BinaryTree</span>(<span class="v">10</span>)
+<span class="k">for</span> Letter <span class="k">in</span> [<span class="s">"M"</span>, <span class="s">"D"</span>, <span class="s">"T"</span>, <span class="s">"A"</span>, <span class="s">"P"</span>]:
+    Tree.<span class="f">Insert</span>(Letter)
+<span class="f">print</span>(Tree.<span class="f">Search</span>(<span class="s">"D"</span>), Tree.<span class="f">Search</span>(<span class="s">"K"</span>))</div>
+    <div id="opts22">
+      <div class="opt" onclick="pickOpt(22,'a',this)">a) True False</div>
+      <div class="opt" onclick="pickOpt(22,'b',this)">b) True True</div>
+      <div class="opt" onclick="pickOpt(22,'c',this)">c) False False</div>
+      <div class="opt" onclick="pickOpt(22,'d',this)">d) An error, because Search() is not a method of BinaryTree</div>
+    </div>
+    <div class="fb" id="fb22"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 23 — Review: fill in the gaps</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag a word into each gap to complete the summary. Two chips are not needed.</div>
+    <div class="drag-bank" id="bank23">
+      <div class="drag-chip" draggable="true">private</div>
+      <div class="drag-chip" draggable="true">Head</div>
+      <div class="drag-chip" draggable="true">containment</div>
+      <div class="drag-chip" draggable="true">public</div>
+      <div class="drag-chip" draggable="true">TopPointer</div>
+      <div class="drag-chip" draggable="true">inheritance</div>
+      <div class="drag-chip" draggable="true">-1</div>
+      <div class="drag-chip" draggable="true">Root</div>
+    </div>
+    <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:16px 20px;font-size:14pt;line-height:2.6;">
+      In an ADT class, the array and the pointers are <span id="dz23a" class="drop-zone">?</span> attributes, and operations such as Push and Enqueue are <span id="dz23b" class="drop-zone">?</span> methods. A stack only needs <span id="dz23c" class="drop-zone">?</span>. A linked list starts at its <span id="dz23d" class="drop-zone">?</span> pointer and a binary tree starts at its <span id="dz23e" class="drop-zone">?</span> pointer. A null pointer is shown by <span id="dz23f" class="drop-zone">?</span>.
+    </div>
+    <button class="check-btn" id="btn23" onclick="checkDrop23()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res23"></div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div style="background:#007BA6;border-radius:8px;padding:28px 32px;margin-bottom:20px;">
+  <div style="font-size:16pt;font-weight:700;color:#ffffff;margin-bottom:16px;">&#10003; Summary — CIE 9618 Topic 20.1: Coding ADTs with OOP</div>
+  <div class="g2" style="gap:10px;">
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>ADT as a class:</strong> the array and pointers are private attributes set up in the constructor; the operations are public methods. -1 is the null pointer.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Stack (LIFO):</strong> one pointer, <code style="background:rgba(0,0,0,0.2);color:#fff;">TopPointer</code>, starting at -1. Push: check full, move up, store. Pop: check empty, read, move down.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Queue (FIFO):</strong> Head, Tail and NumberOfItems. Enqueue moves Tail; Dequeue moves Head; both wrap with <code style="background:rgba(0,0,0,0.2);color:#fff;">% Size</code>.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Linked list:</strong> a Node class (Data, NextNode) plus a LinkedList class containing an array of nodes, a Head pointer and a Free pointer. Traverse by following GetNext() until -1.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Binary tree:</strong> a TreeNode class (Data, Left, Right) plus a BinaryTree class with a Root pointer. Smaller values go left. In-order traversal is recursive and outputs ascending order.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>OOP techniques used:</strong> encapsulation (private data, public methods), getters and setters on nodes, and containment (a list or tree has nodes).</div>
+  </div>
+</div>
+
+</div></div>
+<script>
+// ══════════════════════════════════════════════════
+//  WORKED EXAM QUESTIONS — reveal model answer
+// ══════════════════════════════════════════════════
+function toggleAns(n, btn) {
+  var a = document.getElementById('ans' + n);
+  var open = a.style.display === 'block';
+  a.style.display = open ? 'none' : 'block';
+  btn.innerHTML = open ? '&#128065; Show model answer' : '&#128065; Hide model answer';
+}
+
+// ══════════════════════════════════════════════════
+//  MCQ — pure JS, auto-submits on click
+// ══════════════════════════════════════════════════
+var mcqChosen = {};
+var MCQ_CORRECT = {"3": "b", "4": "a", "8": "b", "12": "b", "16": "b", "22": "a"};
+var MCQ_FB = {
+ "3": {
+  "ok": "&#10003; Correct! Index 0 is the first node in the array, so 0 must mean \"go to node 0\". -1 is outside the array, so it safely means \"nothing here\".",
+  "a": "&#10007; Memory is not the reason. 0 is a real index in the array, so it cannot also mean \"no node\".",
+  "c": "&#10007; Python can store 0 anywhere. The problem is that 0 would point to a real node.",
+  "d": "&#10007; The value of the null pointer has nothing to do with order. -1 is used because it can never be a real index."
+ },
+ "4": {
+  "ok": "&#10003; Correct! After pushing A, B, C the first Pop() returns C. D is then pushed on top of B, so the next two pops return D then B.",
+  "b": "&#10007; Stacks are LIFO: D was pushed last, so it comes off before B.",
+  "c": "&#10007; A was pushed first, so it is at the bottom. The first Pop() returns the last item pushed: C.",
+  "d": "&#10007; C was already removed by the first Pop(), so it cannot be returned again."
+ },
+ "8": {
+  "ok": "&#10003; Correct! After A, B, C, Tail is 2. Dequeue() frees index 0. Tail then moves to (2 + 1) % 3 = 0, so D reuses index 0.",
+  "a": "&#10007; Index 3 does not exist in an array of size 3. The % operator wraps Tail back to 0.",
+  "c": "&#10007; Index 2 holds C. Tail moves on to (2 + 1) % 3 = 0.",
+  "d": "&#10007; Dequeue() removed A first, so NumberOfItems is 2, not 3. There is room for D."
+ },
+ "12": {
+  "ok": "&#10003; Correct! Start at Head (2): Ant. Its pointer is 0: Cat. Then 3: Bee. Then 1: Dog, whose pointer is -1, so the loop stops.",
+  "a": "&#10007; That is the order of the array indexes. Traverse() follows the pointers, starting at Head = 2.",
+  "c": "&#10007; That is alphabetical order. Follow the pointers from Head: 2 &rarr; 0 &rarr; 3 &rarr; 1.",
+  "d": "&#10007; That is the pointer path backwards. Start at Head (index 2) and follow each NextNode."
+ },
+ "16": {
+  "ok": "&#10003; Correct! In-order traversal (left, node, right) of a binary search tree always outputs the values in ascending order.",
+  "a": "&#10007; That is the order they were inserted. In-order traversal visits left, then node, then right, giving ascending order.",
+  "c": "&#10007; That is post-order (left, right, node). In-order prints each node <em>between</em> its subtrees.",
+  "d": "&#10007; That is pre-order (node, left, right). In-order prints the left subtree first."
+ },
+ "22": {
+  "ok": "&#10003; Correct! \"D\" is in the tree (left of \"M\"). \"K\" would go left of \"M\" then right of \"D\", but that pointer is -1, so the loop ends and returns False.",
+  "b": "&#10007; \"K\" was never inserted. The search follows M &rarr; D &rarr; (right of D = -1) and stops, returning False.",
+  "c": "&#10007; \"D\" was inserted, and it is the left child of the root \"M\", so it is found.",
+  "d": "&#10007; Search() is shown in the code above, as part of BinaryTree."
+ }
+};
+function pickOpt(qNum, letter, el) {
+  if (mcqChosen[qNum] && mcqChosen[qNum].locked) return;
+  var box = el.parentNode;
+  box.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('selected'); });
+  el.classList.add('selected');
+  mcqChosen[qNum] = { letter: letter, locked: false };
+  submitMCQ(qNum, letter);
+}
+
+function submitMCQ(qNum, letter) {
+  if (mcqChosen[qNum] && mcqChosen[qNum].locked) return;
+  var correct = MCQ_CORRECT[qNum];
+  var isOk = (letter === correct);
+  var box = document.getElementById('opts' + qNum);
+  var fb  = document.getElementById('fb' + qNum);
+  if (box) {
+    box.querySelectorAll('.opt').forEach(function(el) {
+      el.classList.add('locked');
+      var m = el.getAttribute('onclick').match(/pickOpt\(\d+,'([a-d])'/);
+      var v = m ? m[1] : '';
+      if (v === correct)           el.classList.add(isOk ? 'correct' : 'reveal');
+      else if (v === letter && !isOk) el.classList.add('wrong');
+    });
+  }
+  if (fb) {
+    fb.style.display = 'block';
+    var fd = MCQ_FB[qNum];
+    fb.className = 'fb ' + (isOk ? 'fb-ok' : 'fb-bad');
+    fb.innerHTML = isOk ? fd.ok : (fd[letter] || '&#10007; Not quite — the correct answer is highlighted in green above.');
+  }
+  if (mcqChosen[qNum]) mcqChosen[qNum].locked = true;
+}
+
+
+
+
+// ══════════════════════════════════════════════════
+//  WORD CHIPS
+// ══════════════════════════════════════════════════
+var woptChosen = {};
+var WOPT_CORRECT = {"5": "b", "9": "c", "19": "b"};
+var WOPT_FB = {
+ "5": {
+  "ok": "&#10003; Correct! Indexes run from 0 to Size - 1, so the stack is full when TopPointer reaches Size - 1.",
+  "a": "&#10007; With Size items, the last index is Size - 1. TopPointer never reaches Size.",
+  "c": "&#10007; TopPointer is 0 when there is exactly one item, not when the stack is full.",
+  "d": "&#10007; TopPointer is -1 when the stack is <em>empty</em>."
+ },
+ "9": {
+  "ok": "&#10003; Correct! 6 % 6 = 0, so Head wraps round to the start of the array.",
+  "a": "&#10007; The last index is 5, so 6 would be outside the array. 6 % 6 = <strong>0</strong>.",
+  "b": "&#10007; Head must move on after a dequeue. 6 % 6 = <strong>0</strong>.",
+  "d": "&#10007; 6 % 6 leaves no remainder, so the answer is <strong>0</strong>."
+ },
+ "19": {
+  "ok": "&#10003; Correct! The method only does its work when Index is <em>not</em> -1. When Index is -1 (the base case) it does nothing and returns.",
+  "a": "&#10007; With == the method would only run when there is <em>no</em> node. Use <strong>!=</strong>.",
+  "c": "&#10007; No real index is less than -1, so with &lt; the method would never visit any node. Use <strong>!=</strong>.",
+  "d": "&#10007; A single = is assignment and causes a syntax error. Use <strong>!=</strong>."
+ }
+};
+function pickWopt(qNum, letter, el) {
+  if (woptChosen[qNum] && woptChosen[qNum].locked) return;
+  var container = el.parentNode;
+  container.querySelectorAll('.wopt').forEach(function(o){ o.classList.remove('selected'); });
+  el.classList.add('selected');
+  woptChosen[qNum] = { letter: letter, locked: false };
+  var correct = WOPT_CORRECT[qNum];
+  var isOk = (letter === correct);
+  container.querySelectorAll('.wopt').forEach(function(w) {
+    w.classList.add('locked');
+    var m = w.getAttribute('onclick').match(/pickWopt\(\d+,'([a-d])'/);
+    var v = m ? m[1] : '';
+    if (v === correct)           w.classList.add(isOk ? 'correct' : 'reveal');
+    else if (v === letter && !isOk) w.classList.add('wrong');
+  });
+  var fb = document.getElementById('fb' + qNum);
+  if (fb) {
+    fb.style.display = 'block';
+    var fd = WOPT_FB[qNum];
+    fb.className = 'fb ' + (isOk ? 'fb-ok' : 'fb-bad');
+    fb.innerHTML = isOk ? fd.ok : (fd[letter] || '&#10007; Not quite — the correct answer is highlighted above.');
+  }
+  woptChosen[qNum] = { letter: letter, locked: true };
+}
+
+
+// ══════════════════════════════════════════════════
+//  TRUE / FALSE
+// ══════════════════════════════════════════════════
+var TF_DATA = {
+ "1": {
+  "ok": "&#10003; True! -1 shows there is no top item yet. The first Push() moves it to 0.",
+  "bad": "&#10007; This is True. TopPointer starts at -1, so the first item is stored at index 0."
+ },
+ "2": {
+  "ok": "&#10003; Correct — False! The item stays in the array; only TopPointer moves down. That space will be overwritten by the next Push().",
+  "bad": "&#10007; This is False. The array keeps its size. Moving TopPointer down is enough to remove the item from the stack."
+ },
+ "3": {
+  "ok": "&#10003; True! Returning a Boolean lets the caller react, e.g. print \"Stack full\".",
+  "bad": "&#10007; This is True. Push() returns False on a full stack and True when it succeeds."
+ },
+ "4": {
+  "ok": "&#10003; Correct — False! TopPointer is private. Outside code must use the class's methods.",
+  "bad": "&#10007; This is False. Private attributes cannot be changed from outside the class."
+ },
+ "5": {
+  "ok": "&#10003; True! Items join at the tail and leave at the head.",
+  "bad": "&#10007; This is True. Each operation only moves its own pointer."
+ },
+ "6": {
+  "ok": "&#10003; Correct — False! Tail can be at any index when the queue is full, because it wraps. Use NumberOfItems == Size.",
+  "bad": "&#10007; This is False. Because the pointers wrap, Tail's position does not tell you whether the queue is full. NumberOfItems does."
+ },
+ "7": {
+  "ok": "&#10003; True! 7 divided by 5 is 1 remainder 2.",
+  "bad": "&#10007; This is True. 7 = 1 × 5 + 2, so 7 % 5 = 2."
+ },
+ "8": {
+  "ok": "&#10003; True! That is the whole point of wrapping: freed spaces are used again.",
+  "bad": "&#10007; This is True. Without wrapping, the spaces at the front would be wasted."
+ },
+ "9": {
+  "ok": "&#10003; True! A LinkedList has an array of Node objects. A linked list is not a kind of node.",
+  "bad": "&#10007; This is True. LinkedList stores Node objects, so it uses containment, not inheritance."
+ },
+ "10": {
+  "ok": "&#10003; Correct — False! It starts at Head and follows the NextNode pointers, which can be in any index order.",
+  "bad": "&#10007; This is False. The pointers decide the order, not the indexes."
+ },
+ "11": {
+  "ok": "&#10003; True! -1 means the free list is empty, so the list is full.",
+  "bad": "&#10007; This is True. A null Free pointer means every node is in use."
+ },
+ "12": {
+  "ok": "&#10003; Correct — False! __Data is private to Node, so LinkedList must call GetData().",
+  "bad": "&#10007; This is False. Private attributes belong to their own class. Use the public getter GetData()."
+ }
+};
+function doTF(n, userAns, correctAns) {
+  var row = document.getElementById('tf' + n);
+  if (!row || row.classList.contains('done')) return;
+  row.classList.add('done');
+  var isOk = (userAns === correctAns);
+  row.querySelectorAll('.tf-btn').forEach(function(b) {
+    var bT = b.textContent.trim() === 'True';
+    if (bT === userAns)             b.className = isOk ? 'tf-btn ok' : 'tf-btn bad';
+    if (!isOk && bT === correctAns) b.className = 'tf-btn show';
+  });
+  var fb = document.createElement('div');
+  fb.style.cssText = 'margin-top:8px;padding:10px 14px;border-radius:6px;font-size:13pt;line-height:1.6;font-family:Lato,sans-serif;';
+  fb.style.background = isOk ? '#e8f5e9' : '#ffebee';
+  fb.style.color      = isOk ? '#1b5e20' : '#7f0000';
+  fb.style.border     = isOk ? '1px solid #81c784' : '1px solid #ef9a9a';
+  fb.innerHTML = isOk ? TF_DATA[n].ok : TF_DATA[n].bad;
+  row.appendChild(fb);
+}
+
+
+// ══════════════════════════════════════════════════
+//  MATCH ACTIVITIES
+// ══════════════════════════════════════════════════
+function runMatch(matchId, btnId, resId, okMsg, badMsg) {
+  var rows = document.querySelectorAll('#' + matchId + ' .match-row');
+  var allOk = true;
+  rows.forEach(function(row) {
+    row.classList.remove('ok','bad');
+    var sel = row.querySelector('.match-sel');
+    if (sel.value === sel.getAttribute('data-ans')) row.classList.add('ok');
+    else { row.classList.add('bad'); allOk = false; }
+  });
+  var res = document.getElementById(resId);
+  res.style.display = 'block';
+  if (allOk) {
+    res.className = 'match-result fb fb-ok';
+    res.innerHTML = '&#10003; ' + okMsg;
+    document.getElementById(btnId).disabled = true;
+    rows.forEach(function(r){ r.querySelector('.match-sel').disabled = true; });
+  } else {
+    res.className = 'match-result fb fb-bad';
+    res.innerHTML = '&#10007; ' + badMsg;
+  }
+}
+
+
+
+function checkMatch1() {
+  runMatch('match1','match1-btn','match1-res',
+    "All correct! Knowing the rule for each ADT tells you which pointers the class needs.",
+    "One or more are wrong \u2014 check those in red. Hint: LIFO is a pile of plates; FIFO is a line at a shop.");
+}
+function checkMatch2() {
+  runMatch('match2','match2-btn','match2-res',
+    "All correct! These five bugs account for most lost marks in ADT coding questions.",
+    "One or more are wrong. Hint: think about which pointer is involved in each symptom and what it should do.");
+}
+
+// ══════════════════════════════════════════════════
+//  DRAG & DROP ENGINE
+// ══════════════════════════════════════════════════
+var _drag = null;
+document.addEventListener('dragstart', function(e) {
+  var t = e.target;
+  if (t.classList.contains('drag-chip') && !t.classList.contains('locked')) {
+    _drag = t; e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', t.textContent);
+  }
+});
+document.addEventListener('dragover', function(e) {
+  var t = e.target;
+  while (t && t !== document.body) {
+    if (t.classList.contains('drop-zone') || t.classList.contains('drag-bank') || t.classList.contains('sort-zone')) {
+      e.preventDefault(); t.classList.add('drag-over'); return;
+    }
+    t = t.parentNode;
+  }
+});
+document.addEventListener('dragleave', function(e) {
+  var t = e.target; if (t && t.classList) t.classList.remove('drag-over');
+});
+document.addEventListener('drop', function(e) {
+  e.preventDefault(); if (!_drag) return;
+  var tgt = e.target;
+  while (tgt && tgt !== document.body) {
+    if (tgt.classList.contains('drop-zone') || tgt.classList.contains('drag-bank') || tgt.classList.contains('sort-zone')) break;
+    tgt = tgt.parentNode;
+  }
+  if (!tgt || tgt === document.body) return;
+  tgt.classList.remove('drag-over');
+  if (tgt.classList.contains('drop-zone')) {
+    var displaced = tgt.querySelector('.drag-chip');
+    if (displaced) {
+      var oid = displaced.getAttribute('data-origin') || '';
+      var ori = oid ? document.getElementById(oid) : _drag.parentNode;
+      if (ori) ori.appendChild(displaced);
+      displaced.removeAttribute('data-origin');
+    }
+    _drag.setAttribute('data-origin', _drag.parentNode.id || '');
+    _drag.parentNode.removeChild(_drag);
+    tgt.appendChild(_drag);
+  } else {
+    if (tgt === _drag.parentNode) { _drag = null; return; }
+    _drag.removeAttribute('data-origin');
+    _drag.parentNode.removeChild(_drag);
+    tgt.appendChild(_drag);
+  }
+  _drag = null;
+});
+
+function getDZ(id) { var z=document.getElementById(id); var c=z?z.querySelector('.drag-chip'):null; return c?c.textContent.trim():''; }
+function getSort(id) { var z=document.getElementById(id); if(!z)return[]; return Array.from(z.querySelectorAll('.drag-chip')).map(function(c){return c.textContent.trim();}); }
+
+// ══════════════════════════════════════════════════
+//  SLOT CHECKER — used by activities 7, 11, 16, 18, 22
+// ══════════════════════════════════════════════════
+var DONE = {};
+function lockChips(n, ids) {
+  document.querySelectorAll('#bank' + n + ' .drag-chip').forEach(function(c){ c.classList.add('locked'); });
+  ids.forEach(function(id){ var z=document.getElementById(id); if(z) z.querySelectorAll('.drag-chip').forEach(function(c){ c.classList.add('locked'); }); });
+}
+function checkSlots(n, ids, ans, okMsg, hints, emptyMsg) {
+  if (DONE[n]) return;
+  var vals = ids.map(getDZ);
+  var res = document.getElementById('res' + n);
+  res.style.display = 'block';
+  if (vals.some(function(v){ return v === ''; })) {
+    res.className = 'drag-result fb fb-bad';
+    res.innerHTML = '&#10007; ' + emptyMsg;
+    return;
+  }
+  var wrong = [];
+  vals.forEach(function(v, i){ if (v !== ans[i]) wrong.push(hints[i]); });
+  if (wrong.length === 0) {
+    DONE[n] = true;
+    document.getElementById('btn' + n).disabled = true;
+    lockChips(n, ids);
+    res.className = 'drag-result fb fb-ok';
+    res.innerHTML = '&#10003; ' + okMsg;
+  } else {
+    res.className = 'drag-result fb fb-bad';
+    res.innerHTML = '&#10007; Not quite. ' + wrong.slice(0, 2).join(' ') + (wrong.length > 2 ? ' (' + (wrong.length - 2) + ' more to fix.)' : '');
+  }
+}
+
+function checkCols(n, cols, names, total, okMsg, tip) {
+  if (DONE[n]) return;
+  var res = document.getElementById('res' + n);
+  res.style.display = 'block';
+  var count = 0, wrong = [];
+  Object.keys(cols).forEach(function(zone) {
+    getSort(zone).forEach(function(v) {
+      count++;
+      if (cols[zone].indexOf(v) === -1) {
+        var home = Object.keys(cols).filter(function(z){ return cols[z].indexOf(v) !== -1; })[0];
+        wrong.push('“' + v + '” belongs in <strong>' + names[home] + '</strong>.');
+      }
+    });
+  });
+  if (count < total) { res.className='drag-result fb fb-bad'; res.innerHTML='&#10007; Drag all ' + total + ' chips into a column before checking.'; return; }
+  if (wrong.length === 0) {
+    DONE[n] = true; document.getElementById('btn' + n).disabled = true;
+    Object.keys(cols).forEach(function(z){ document.querySelectorAll('#' + z + ' .drag-chip').forEach(function(c){ c.classList.add('locked'); }); });
+    res.className = 'drag-result fb fb-ok'; res.innerHTML = '&#10003; ' + okMsg;
+  } else {
+    res.className = 'drag-result fb fb-bad'; res.innerHTML = '&#10007; ' + wrong.slice(0, 2).join(' ') + ' ' + tip;
+  }
+}
+
+
+function checkSort2() {
+  checkCols(2, {"sort2-0": ["TopPointer"], "sort2-1": ["Tail", "NumberOfItems", "Head (of a queue)"], "sort2-2": ["Free", "NextNode"], "sort2-3": ["Left", "Right"]},
+    {"sort2-0": "Stack", "sort2-1": "Queue", "sort2-2": "Linked list / Node", "sort2-3": "Binary tree / TreeNode"}, 8,
+    "All correct! A stack needs one pointer (the top). A queue needs a head and a tail, plus a count. A linked list needs a next pointer in each node and a free list. A tree node needs left and right pointers.",
+    "Tip: think about where items are added and removed. Each place that moves needs its own pointer.");
+}
+function checkDrop6() {
+  checkSlots(6, ["dz6a", "dz6b", "dz6c", "dz6d"],
+    ["self.IsFull()", "self.__TopPointer = self.__TopPointer + 1", "self.__Items[self.__TopPointer] = NewItem", "return True"],
+    "All correct! Check the stack is not full, move TopPointer up to the next free space, store the item there, and report success.",
+    ["Gap 1: you cannot push onto a <strong>full</strong> stack — <strong>self.IsFull()</strong>.", "Gap 2: move the pointer <strong>up</strong> first: TopPointer + 1.", "Gap 3: then store the item at the new top position.", "Gap 4: finish by reporting success — <strong>return True</strong>."],
+    "Drag a chip into every gap before checking.");
+}
+function checkDrop10() {
+  checkSlots(10, ["dz10a", "dz10b", "dz10c", "dz10d"],
+    ["self.__NumberOfItems == 0", "Item = self.__Items[self.__Head]", "self.__Head = (self.__Head + 1) % self.__Size", "self.__NumberOfItems = self.__NumberOfItems - 1"],
+    "All correct! Check the queue is not empty, read the item at the head, move Head on (wrapping with %), and reduce the count.",
+    ["Gap 1: you cannot dequeue from an <strong>empty</strong> queue — NumberOfItems == 0.", "Gap 2: items leave from the <strong>head</strong>, not the tail.", "Gap 3: move Head on by one, wrapping with <strong>% self.__Size</strong>.", "Gap 4: one fewer item — <strong>NumberOfItems - 1</strong>."],
+    "Drag a chip into every gap before checking.");
+}
+function checkDrop13() {
+  checkSlots(13, ["dz13a", "dz13b", "dz13c", "dz13d", "dz13e", "dz13f", "dz13g"],
+    ["def Search(self, Target):", "Current = self.__Head", "while Current != -1:", "if self.__Nodes[Current].GetData() == Target:", "return True", "Current = self.__Nodes[Current].GetNext()", "return False"],
+    "Correct! Start at Head, loop until the null pointer, return True as soon as the data matches, otherwise follow the next pointer. Only return False after the loop.",
+    ["Line 1: the method header.", "Line 2: start at the first node — Current = self.__Head.", "Line 3: keep going until the null pointer, -1.", "Line 4: inside the loop, compare this node's data with Target.", "Line 5: inside the if, a match means return True.", "Line 6: no match, so follow the pointer to the next node.", "Line 7: return False only after the whole list has been checked."],
+    "Drag a line into every slot before checking.");
+}
+function checkDrop14() {
+  checkSlots(14, ["dz14a", "dz14b", "dz14c", "dz14d"],
+    ["NewIndex = self.__Free", "self.__Free = self.__Nodes[NewIndex].GetNext()", "self.__Nodes[NewIndex].SetNext(self.__Head)", "self.__Head = NewIndex"],
+    "All correct! Take the first free node, move Free on to the next free node, store the data, point the new node at the old first node, then make it the new Head.",
+    ["Gap 1: the new node is the first free one — <strong>NewIndex = self.__Free</strong>.", "Gap 2: Free moves on to the next free node <em>before</em> that pointer is overwritten.", "Gap 3: the new node points to the old first node — <strong>SetNext(self.__Head)</strong>.", "Gap 4: the new node becomes the start of the list — <strong>self.__Head = NewIndex</strong>."],
+    "Drag a chip into every gap before checking.");
+}
+function checkSort17() {
+  checkCols(17, {"sort17-0": ["25", "49", "10"], "sort17-1": ["75", "50", "90"]},
+    {"sort17-0": "Left subtree (less than 50)", "sort17-1": "Right subtree (50 or more)"}, 6,
+    "All correct! Smaller values go left. Larger values go right, and so does an equal value, because Insert() uses <code>if NewData &lt; …</code>, sending everything else to the else branch.",
+    "Tip: look at the Insert() code. Only values that are strictly less than 50 go left.");
+}
+function checkDrop18() {
+  checkSlots(18, ["dz18a", "dz18b", "dz18c", "dz18d"],
+    ["self.__Nodes[Current].GetLeft() == -1", "self.__Nodes[Current].SetLeft(NewIndex)", "Placed = True", "Current = self.__Nodes[Current].GetLeft()"],
+    "All correct! If there is no left child, attach the new node there and stop. Otherwise move down to the left child and keep looking.",
+    ["Gap 1: check whether the current node has no left child — <strong>GetLeft() == -1</strong>.", "Gap 2: attach the new node on the <strong>left</strong> — SetLeft(NewIndex).", "Gap 3: the node has been placed, so stop the loop — <strong>Placed = True</strong>.", "Gap 4: otherwise move down the left branch — <strong>Current = …GetLeft()</strong>."],
+    "Drag a chip into every gap before checking.");
+}
+function checkSort20() {
+  checkCols(20, {"sort20-0": ["Undo button in a text editor", "Checking brackets match in an expression"], "sort20-1": ["Print jobs sent to a shared printer", "Customers waiting for a phone helpline"], "sort20-2": ["A playlist where songs are often added at the front"], "sort20-3": ["Searching a large sorted set of usernames quickly"]},
+    {"sort20-0": "Stack", "sort20-1": "Queue", "sort20-2": "Linked list", "sort20-3": "Binary tree"}, 6,
+    "All correct! Undo and bracket checking need the most recent item first (stack). Jobs and callers are served in arrival order (queue). Frequent insertion suits a linked list. Fast searching of ordered data suits a binary search tree.",
+    "Tip: ask \"which item must come out next?\" — the newest (stack), the oldest (queue), or \"do I need to search or insert in order?\" (tree or list).");
+}
+function checkDrop23() {
+  checkSlots(23, ["dz23a", "dz23b", "dz23c", "dz23d", "dz23e", "dz23f"],
+    ["private", "public", "TopPointer", "Head", "Root", "-1"],
+    "All correct — you have the pattern behind every ADT class!",
+    ["Gap 1: data and pointers are hidden — <strong>private</strong>.", "Gap 2: operations can be called from outside — <strong>public</strong>.", "Gap 3: a stack needs one pointer — <strong>TopPointer</strong>.", "Gap 4: a linked list starts at <strong>Head</strong>.", "Gap 5: a binary tree starts at <strong>Root</strong>.", "Gap 6: \"points to nothing\" is <strong>-1</strong>."],
+    "Drag a word into every gap before checking.");
+}
+</script>
+</body>
+</html>
